@@ -4,11 +4,22 @@
     <title>Smart Garden Monitoring System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
-      body {
-        background: #e8f5e9;
-        font-family: Arial, sans-serif;
-        padding: 20px;
+      :root{
+        --bg:#eef6f2; --card:#ffffff; --muted:#64748b; --accent:#16a34a;
       }
+      body{background:var(--bg);font-family:Arial, sans-serif;margin:0;padding:18px;color:#072a18}
+      h1{margin:0 0 18px;text-align:center;font-size:28px}
+
+      .layout{display:flex;align-items:flex-start}
+      .main{flex:1;padding-right:16px;box-sizing:border-box}
+
+      .matrices{display:flex;gap:12px;margin-bottom:14px}
+      .matrix-box{background:var(--card);border-radius:8px;padding:12px;box-shadow:0 6px 18px rgba(2,6,23,0.06);flex:1}
+  .matrix-box h3{margin:0 0 8px;color:#0b8e47;font-weight:700}
+  .matrix-table{width:100%;border-collapse:collapse;font-family:monospace}
+  .matrix-table td{border:1px solid rgba(2,6,23,0.06);padding:8px;text-align:center;width:20%}
+
+      .matrix-container{margin-bottom:18px}
 
       .matrix-container {
         background: #f0f0f0;
@@ -26,13 +37,7 @@
         border-radius: 5px;
       }
 
-      .category {
-        margin-bottom: 30px;
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
+  .category {margin-bottom:18px;background:white;padding:12px;border-radius:8px;box-shadow:0 4px 10px rgba(2,6,23,0.04)}
 
       .category-title {
         font-size: 24px;
@@ -40,22 +45,9 @@
         margin-bottom: 15px;
       }
 
-      .plants-container {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-      }
+  .plants-container{display:flex;gap:16px;flex-wrap:wrap}
 
-      .plant {
-        position: relative;
-        width: 180px;
-        height: 220px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-        background: #f5f5f5;
-      }
+  .plant{position:relative;width:180px;height:220px;border:1px solid rgba(2,6,23,0.06);border-radius:8px;padding:10px;text-align:center;background:#fafafa}
 
       .plant-image {
         width: 150px;
@@ -90,13 +82,24 @@
       }
 
       .tap.on {
-        background: #2196f3;
+        background: #1e88e5;
+      }
+
+      /* lid fill when water is ON */
+      .tap.on::after{
+        content:'';
+        position:absolute;
+        left:4px;right:4px;bottom:4px;height:60%;
+        background:rgba(30,136,229,0.9);
+        border-radius:3px;
+        z-index:1;
+        opacity:0.9;
       }
 
       .water-flow {
         position: absolute;
-        width: 20px;
-        height: 60px;
+        width: 30px;
+        height: 80px;
         left: 50%;
         top: 20px;
         transform: translateX(-50%);
@@ -127,6 +130,34 @@
         animation: dropWater 1s infinite;
         animation-delay: 0.6s;
       }
+      /* Drip animation (default) */
+      .water-flow.drip .water-drop:nth-child(1) {
+        animation: dropWater 1s infinite;
+        animation-delay: 0s;
+      }
+      .water-flow.drip .water-drop:nth-child(2) {
+        animation: dropWater 1s infinite;
+        animation-delay: 0.3s;
+      }
+      .water-flow.drip .water-drop:nth-child(3) {
+        animation: dropWater 1s infinite;
+        animation-delay: 0.6s;
+      }
+
+      /* Shower animation (faster, more drops) */
+      .water-flow.shower .water-drop {
+        width: 10px;
+        height: 10px;
+        background: #03a9f4;
+      }
+      .water-flow.shower .water-drop:nth-child(1) { animation: dropWater 0.6s infinite; animation-delay: 0s; }
+      .water-flow.shower .water-drop:nth-child(2) { animation: dropWater 0.6s infinite; animation-delay: 0.08s; }
+      .water-flow.shower .water-drop:nth-child(3) { animation: dropWater 0.6s infinite; animation-delay: 0.16s; }
+      .water-flow.shower .water-drop:nth-child(4) { animation: dropWater 0.6s infinite; animation-delay: 0.24s; }
+      .water-flow.shower .water-drop:nth-child(5) { animation: dropWater 0.6s infinite; animation-delay: 0.32s; }
+      .water-flow.shower .water-drop:nth-child(6) { animation: dropWater 0.6s infinite; animation-delay: 0.40s; }
+      .water-flow.shower .water-drop:nth-child(7) { animation: dropWater 0.6s infinite; animation-delay: 0.48s; }
+      .water-flow.shower .water-drop:nth-child(8) { animation: dropWater 0.6s infinite; animation-delay: 0.56s; }
 
       @keyframes dropWater {
         0% {
@@ -154,58 +185,94 @@
         bottom: 5px;
         right: 8px;
       }
+
+  /* Chat Interface Styles: fixed to right, resizable with left resizer */
+  .chat-container{position:fixed;top:60px;right:0;height:calc(100% - 90px);width:30%;min-width:260px;max-width:520px;background:var(--card);border-left:1px solid rgba(2,6,23,0.04);border-radius:8px 0 0 8px;z-index:1200;display:flex;flex-direction:column}
+  .chat-resizer{position:absolute;left:-8px;top:0;width:8px;height:100%;cursor:w-resize}
+
+
+    .chat-header{background:linear-gradient(90deg,#075e34,#25d366);color:white;padding:10px;border-radius:8px 8px 0 0;text-align:center;font-weight:700}
+
+  .chat-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+
+  .chat-input{display:flex;padding:10px;gap:8px}
+
+  .chat-input input{flex:1;padding:8px;border-radius:18px;border:1px solid rgba(2,6,23,0.06)}
+
+  .chat-input button{padding:8px 12px;border-radius:18px;background:#25d366;color:white;border:0}
+
+  .message{margin:6px 0;padding:8px;border-radius:6px}
+
+      .user-message {
+        background: #25d366;
+        color: #fff;
+        text-align: right;
+        align-self: flex-end;
+        max-width: 80%;
+        padding: 8px 12px;
+        border-radius: 14px 14px 6px 14px;
+      }
+
+      .bot-message{
+        background:#ece5dd;
+        color:#111;
+        text-align:left;
+        align-self: flex-start;
+        max-width:80%;
+        padding:8px 12px;
+        border-radius:14px 14px 14px 6px;
+      }
+  .heading-offset{display:inline-block;transform:translateX(-15rem);transition:transform .18s ease}
     </style>
   </head>
   <body>
-    <h1>Smart Garden Monitoring System</h1>
-
     <div class="matrix-container">
-      <h3>Plant Names Matrix:</h3>
-      <div id="namesMatrix" class="matrix-display"></div>
+      <div style="text-align:center;margin-bottom:12px">
+  <h1 class="heading-offset" style="margin:0;font-size:30px;color:#064e2a">Smart Garden Irrigation System</h1>
+      </div>
 
-      <h3>Plant Status Matrix:</h3>
-      <div id="statusMatrix" class="matrix-display"></div>
+      <div class="layout">
+      <div class="main" id="main">
+        <div class="matrices">
+          <div class="matrix-box">
+            <h3>Plant Names Matrix</h3>
+            <table id="namesMatrix" class="matrix-table"></table>
+          </div>
+          <div class="matrix-box">
+            <h3>Plant Status Matrix</h3>
+            <table id="statusMatrix" class="matrix-table"></table>
+          </div>
+        </div>
+
+        <div id="garden"></div>
+      </div>
+
+      <div class="chat-container" id="chatPanel">
+        <div class="chat-resizer" id="chatResizer"></div>
+        <div class="chat-header"><h3 style="margin:0">Garden Assistant</h3></div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="message bot-message">Hello! I'm your garden assistant. Try: "turn on basil (drip)" or "turn on all (shower)" — I support DRIP and SHOWER.</div>
+        </div>
+        <div class="chat-input">
+          <input type="text" id="userInput" placeholder="Type your command...">
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
     </div>
-
-    <div id="garden"></div>
-    
 
     <script>
       const plant_img_urls = {
-        Basil: "{{ url_for('static', filename='images/basil.png') }}",
-        Beans: "{{ url_for('static', filename='images/beans.png') }}",
-        beetroot: "{{ url_for('static', filename='images/beetroot.png') }}",
-        Carrot: "{{ url_for('static', filename='images/carrot.jpg') }}",
-        Tomato: "{{ url_for('static', filename='images/tomato.png') }}",
+        "Beans": "/static/images/beans.png",
+        "beetroot": "/static/images/beetroot.png",
+        "Carrot": "/static/images/carrot.jpg",
+        "Tomato": "/static/images/tomato.png",
+        "Basil": "/static/images/basil.png"
       };
 
-      // Configuration for categories and plants
-      function generateGardenBeds(bedCount, plants, shuffle = false) {
-        function shuffleArray(array) {
-          return array
-            .map((item) => ({ item, sort: Math.random() }))
-            .sort((a, b) => a.sort - b.sort)
-            .map(({ item }) => item);
-        }
-
-        const categories = Array.from({ length: bedCount }, (_, index) => ({
-          name: `Bed ${index + 1}`,
-          plants: shuffle ? shuffleArray([...plants]) : [...plants],
-        }));
-
-        return categories;
-      }
-
-      const bedCount = 5;
-      const plants = ["Basil", "Beans", "beetroot", "Carrot", "Tomato"];
-      const shuffle = true;
-
-      // const categories = generateGardenBeds(bedCount, plants, shuffle);
       const categories = [
         {
           name: "Bed 1",
-          plants: ["Tomato", "beetroot", "Basil", "Beans", "Carrot"] ,
-         
+          plants: ["Tomato", "beetroot", "Basil", "Beans", "Carrot"],
         },
         {
           name: "Bed 2",
@@ -225,34 +292,49 @@
         },
       ];
 
-      // Initialize matrices
-      const namesMatrix = categories.map((category) => category.plants);
-      let statusMatrix = categories.map((category) =>
-        category.plants.map(() => 0)
-      );
+      // Initialize matrices to the exact values you requested
+      const namesMatrix = [
+        ["Beans","Basil","Carrot","beetroot","Tomato"],
+        ["Tomato","beetroot","Basil","Beans","Carrot"],
+        ["Tomato","beetroot","Beans","Basil","Carrot"],
+        ["beetroot","Basil","Tomato","Beans","Carrot"],
+        ["Basil","Beans","Carrot","Tomato","beetroot"]
+      ];
 
-      // Display names matrix
-      function displayNamesMatrix() {
-        const namesDisplay = $("#namesMatrix");
-        let matrixText = namesMatrix.map((row) => row.join(" | ")).join("\n");
-        namesDisplay.text(matrixText);
+      let statusMatrix = [
+        [0,1,0,1,1],
+        [1,1,1,0,0],
+        [1,1,0,1,0],
+        [1,1,1,0,0],
+        [1,0,0,1,1]
+      ];
+
+      // Render names matrix as table
+      function displayNamesMatrix(){
+        const tbl = $("#namesMatrix"); tbl.empty();
+        namesMatrix.forEach(row=>{
+          const tr = $("<tr>");
+          row.forEach(cell=> tr.append($("<td>").text(cell)));
+          tbl.append(tr);
+        })
       }
 
-      // Display status matrix
-      function displayStatusMatrix() {
-        const statusDisplay = $("#statusMatrix");
-        let matrixText = statusMatrix.map((row) => row.join(" | ")).join("\n");
-        statusDisplay.text(matrixText);
+      // Render status matrix as table
+      function displayStatusMatrix(){
+        const tbl = $("#statusMatrix"); tbl.empty();
+        statusMatrix.forEach(row=>{
+          const tr = $("<tr>");
+          row.forEach(cell=> tr.append($("<td>").text(cell)));
+          tbl.append(tr);
+        })
       }
 
       function updateStatusFromServer() {
-        // statusMatrix = statusMatrix.map((row) =>
-        //   row.map(() => (Math.random() > 0.5 ? 1 : 0))
-        // );
         $.ajax({
           url: "/get_status",
           method: "GET",
           success: function (response) {
+            // keep server as source of truth; update matrix and UI
             statusMatrix = response;
             displayStatusMatrix();
             updateGardenStatus();
@@ -268,58 +350,59 @@
         const garden = $("#garden");
         garden.empty();
 
-        categories.forEach((category, catIndex) => {
+        // Build garden from namesMatrix so visuals match the displayed matrices
+        for (let row = 0; row < namesMatrix.length; row++) {
           const categoryDiv = $("<div>").addClass("category");
           const categoryTitle = $("<div>")
             .addClass("category-title")
-            .text(category.name);
+            .text(`Bed ${row + 1}`);
           const plantsContainer = $("<div>").addClass("plants-container");
 
-          category.plants.forEach((plant, plantIndex) => {
+          for (let col = 0; col < namesMatrix[row].length; col++) {
+            const plant = namesMatrix[row][col];
             const plantDiv = $("<div>").addClass("plant");
             const plantImage = $("<div>").addClass("plant-image");
 
-            // Add plant-specific image
-            const imageWrapper = $("<div>").addClass("plant-image-wrapper"); // Create a wrapper div
+            // Add plant-specific image (case-insensitive lookup)
+            const imageWrapper = $("<div>").addClass("plant-image-wrapper");
+            const src = plant_img_urls[plant] || plant_img_urls[plant.toLowerCase()] || "/api/placeholder/150/150";
             const img = $("<img>")
-              .attr("src", plant_img_urls[plant] || "/api/placeholder/150/150")
+              .attr("src", src)
               .attr("alt", plant);
 
-            imageWrapper.append(img); // Wrap the image inside the wrapper
-            plantImage.append(imageWrapper); // Append the wrapper to plantImage
+            imageWrapper.append(img);
+            plantImage.append(imageWrapper);
 
             const pipe = $("<div>").addClass("pipe");
             const tap = $("<div>")
               .addClass("tap")
-              .attr("data-category", catIndex)
-              .attr("data-plant", plantIndex)
-              .attr("data-status", statusMatrix[catIndex][plantIndex]);
+              .attr("data-category", row)
+              .attr("data-plant", col)
+              .attr("data-status", statusMatrix[row][col]);
 
             const waterFlow = $("<div>").addClass("water-flow");
-            for (let i = 0; i < 3; i++) {
-              waterFlow.append($("<div>").addClass("water-drop"));
-            }
+            // will be built/updated by updateGardenStatus
 
             plantImage.prepend(pipe, tap, waterFlow);
 
             const plantName = $("<div>").addClass("plant-name").text(plant);
             const status = $("<div>")
               .addClass("status")
-              .text(
-                `Water: ${statusMatrix[catIndex][plantIndex] ? "ON" : "OFF"}`
-              );
+              .text(`Water: ${statusMatrix[row][col] ? "ON" : "OFF"}`);
 
             plantDiv.append(plantImage, plantName, status);
             plantsContainer.append(plantDiv);
-          });
+          }
 
           categoryDiv.append(categoryTitle, plantsContainer);
           garden.append(categoryDiv);
-        });
+        }
 
-        // Initial matrix displays
-        displayNamesMatrix();
-        displayStatusMatrix();
+  // Initial matrix displays
+  displayNamesMatrix();
+  displayStatusMatrix();
+  // ensure visual state matches the matrices
+  updateGardenStatus();
       }
 
       // Update garden status based on matrix
@@ -333,11 +416,25 @@
           const plantIndex = tap.data("plant");
           const currentStatus = statusMatrix[catIndex][plantIndex];
 
-          // Update tap and water flow
-          tap.toggleClass("on", currentStatus === 1);
-          status.text(`Water: ${currentStatus ? "ON" : "OFF"}`);
+          // Update tap and water flow: any positive status means ON
+          const isOn = currentStatus > 0;
+          tap.toggleClass("on", isOn);
 
-          if (currentStatus) {
+          // show intensity text
+          let statusText = 'OFF';
+          if (currentStatus === 1) statusText = 'DRIP';
+          else if (currentStatus === 2) statusText = 'SHOWER';
+          status.text(`Water: ${statusText}`);
+
+          // rebuild drops according to intensity
+          waterFlow.removeClass('drip shower');
+          waterFlow.empty();
+          if (isOn) {
+            const drops = currentStatus === 2 ? 8 : 3;
+            for (let i = 0; i < drops; i++) {
+              waterFlow.append($("<div>").addClass("water-drop"));
+            }
+            waterFlow.addClass(currentStatus === 2 ? 'shower' : 'drip');
             waterFlow.show();
           } else {
             waterFlow.hide();
@@ -345,11 +442,82 @@
         });
       }
 
+      // Chat functionality
+      function sendMessage() {
+        const userInput = $("#userInput").val().trim();
+        if (!userInput) return;
+
+        // Add user message to chat
+        addMessage(userInput, 'user');
+        $("#userInput").val('');
+
+        // Send to BERT backend
+        $.ajax({
+          url: "/ask",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ message: userInput }),
+          success: function(response) {
+            addMessage(response.reply, 'bot');
+            // Refresh garden status after command
+            setTimeout(updateStatusFromServer, 500);
+          },
+          error: function() {
+            addMessage("Sorry, I'm having trouble connecting to the server.", 'bot');
+          }
+        });
+      }
+
+      function addMessage(text, sender) {
+        const chatMessages = $("#chatMessages");
+        const messageDiv = $("<div>").addClass("message");
+        
+        if (sender === 'user') {
+          messageDiv.addClass("user-message").text("You: " + text);
+        } else {
+          messageDiv.addClass("bot-message").text("Bot: " + text);
+        }
+        
+        chatMessages.append(messageDiv);
+        chatMessages.scrollTop(chatMessages[0].scrollHeight);
+      }
+
+      // Enter key support for chat
+      $("#userInput").keypress(function(e) {
+        if (e.which == 13) { // Enter key
+          sendMessage();
+        }
+      });
+
+      // Chat resizer behavior: adjust chat width and main padding in real-time
+      (function(){
+        const resizer = document.getElementById('chatResizer');
+        const panel = document.getElementById('chatPanel');
+        const main = document.getElementById('main');
+        let dragging = false;
+        let startX = 0, startWidth = 0;
+
+        if(resizer && panel){
+          resizer.addEventListener('mousedown', e=>{ dragging=true; startX=e.clientX; startWidth=panel.offsetWidth; document.body.style.cursor='w-resize' })
+          window.addEventListener('mousemove', e=>{
+            if(!dragging) return;
+            const dx = startX - e.clientX; // positive when moving left
+            let newW = startWidth + dx;
+            newW = Math.max(260, Math.min(520, newW));
+            panel.style.width = newW + 'px';
+            // reduce main content right padding so it uses remaining space
+            main.style.marginRight = panel.style.width;
+          })
+          window.addEventListener('mouseup', ()=>{ if(dragging){ dragging=false; document.body.style.cursor='default' } })
+        }
+      })();
+
       // Document ready
       $(document).ready(function () {
         createGarden();
+        updateStatusFromServer();
 
-        // Update status every 5 seconds
+        // Update status every 2 seconds
         setInterval(updateStatusFromServer, 2000);
       });
     </script>
