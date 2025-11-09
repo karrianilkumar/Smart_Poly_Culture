@@ -1,0 +1,9 @@
+flask==2.3.3
+flask-cors==4.0.0
+numpy==1.24.3
+transformers==4.35.2
+torch==2.1.1
+requests==2.31.0
+sentencepiece==0.1.99
+protobuf==3.20.3
+accelerate==0.24.1
